@@ -1,14 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="96" fill="#111317"/>
   <g fill="#e9a83c">
-    <!-- two rails (left-right) -->
-    <rect x="86" y="180" width="340" height="30" rx="15"/>
-    <rect x="86" y="302" width="340" height="30" rx="15"/>
-    <!-- sleepers -->
-    <rect x="104" y="150" width="24" height="212" rx="12"/>
-    <rect x="180" y="150" width="24" height="212" rx="12"/>
-    <rect x="256" y="150" width="24" height="212" rx="12"/>
-    <rect x="332" y="150" width="24" height="212" rx="12"/>
-    <rect x="408" y="150" width="24" height="212" rx="12"/>
+    <!-- two rails (left-right): extend 30px past the outer sleepers, matching the
+         30px the sleepers extend above/below the rails -->
+    <rect x="62" y="180" width="388" height="30" rx="15"/>
+    <rect x="62" y="302" width="388" height="30" rx="15"/>
+    <!-- sleepers (centers 104/180/256/332/408 — symmetric about x=256) -->
+    <rect x="92" y="150" width="24" height="212" rx="12"/>
+    <rect x="168" y="150" width="24" height="212" rx="12"/>
+    <rect x="244" y="150" width="24" height="212" rx="12"/>
+    <rect x="320" y="150" width="24" height="212" rx="12"/>
+    <rect x="396" y="150" width="24" height="212" rx="12"/>
   </g>
 </svg>

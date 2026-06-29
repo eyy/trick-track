@@ -20,7 +20,8 @@ export const swipe: Action<HTMLElement, SwipeOptions> = (node, options) => {
 
   function down(e: PointerEvent) {
     if (!opts.onLeft && !opts.onRight) return;
-    if (e.target instanceof HTMLElement && e.target.closest('button, input, textarea')) return;
+    // Element (not HTMLElement) so drags starting on an icon button's inline <svg> are caught too.
+    if (e.target instanceof Element && e.target.closest('button, input, textarea')) return;
     startX = e.clientX;
     startY = e.clientY;
     dx = 0;

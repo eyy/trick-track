@@ -16,7 +16,6 @@
     "@playwright/test": "^1.61.1",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tsconfig/svelte": "^5.0.8",
-    "@types/node": "^24.13.2",
     "@vite-pwa/assets-generator": "^1.0.2",
     "eslint": "^10.6.0",
     "eslint-plugin-svelte": "^3.20.0",
