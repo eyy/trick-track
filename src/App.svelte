@@ -11,6 +11,7 @@
 
 <main>
   <header>
+    <img class="logo" src="/logo.svg" alt="" />
     <h1>trick-track</h1>
   </header>
 
@@ -38,24 +39,23 @@
     padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(2rem + env(safe-area-inset-bottom));
   }
   header {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
     margin-bottom: 1.25rem;
   }
-  /* Wordmark as a logbook stamp; twin amber rule underneath echoes the rail icon. */
+  /* Reuses public/logo.svg (also the PWA-icon source); its ink tile blends into the page. */
+  .logo {
+    width: 1.7rem;
+    height: 1.7rem;
+    flex: none;
+  }
   header h1 {
-    display: inline-block;
     font-family: var(--font-mono);
     font-size: 1.15rem;
     font-weight: 600;
     letter-spacing: 0.01em;
     margin: 0;
-  }
-  header h1::after {
-    content: '';
-    display: block;
-    height: 3px;
-    margin-top: 0.35rem;
-    border-top: 1px solid var(--accent);
-    border-bottom: 1px solid var(--accent);
   }
   .panel {
     margin-bottom: 1.5rem;

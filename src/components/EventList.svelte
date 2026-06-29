@@ -4,6 +4,7 @@
   import { addEvent, deleteEvent, duplicateEvent, updateEvent } from '../lib/db';
   import { dayLabel, timeLabel, toLocalInputValue, fromLocalInputValue } from '../lib/datetime';
   import { categoryColor } from '../lib/color';
+  import { swipe } from '../lib/swipe';
   import type { TrackedEvent } from '../lib/types';
   import EventFields from './EventFields.svelte';
 
@@ -13,8 +14,9 @@
   let editText = $state('');
   let editWhen = $state('');
 
-  // Most-recently deleted event, kept briefly so the delete can be undone.
-  let lastDeleted = $state<TrackedEvent | null>(null);
+  // Recently deleted events, kept until ~5s after the LAST delete (the window rolls
+  // forward on each delete). Deletes accumulate; one Undo restores the whole batch.
+  let pendingDeleted = $state<TrackedEvent[]>([]);
   let undoTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Group the (already newest-first) events into day buckets. Input is sorted by time
@@ -54,28 +56,29 @@
 
   async function onDelete(e: TrackedEvent) {
     await deleteEvent(e.id);
-    lastDeleted = e;
+    pendingDeleted = [...pendingDeleted, e];
     await refresh();
     if (undoTimer) clearTimeout(undoTimer);
     undoTimer = setTimeout(() => {
-      lastDeleted = null;
+      pendingDeleted = [];
       undoTimer = null;
     }, 5000);
   }
 
   async function undoDelete() {
-    if (!lastDeleted) return;
+    if (pendingDeleted.length === 0) return;
     if (undoTimer) {
       clearTimeout(undoTimer);
       undoTimer = null;
     }
-    // Re-add the same content (gets a fresh id), preserving its original time.
-    await addEvent({
-      category: lastDeleted.category,
-      text: lastDeleted.text,
-      timestamp: lastDeleted.timestamp,
-    });
-    lastDeleted = null;
+    // Re-add the batch (each gets a fresh id), preserving original times.
+    const toRestore = pendingDeleted;
+    pendingDeleted = [];
+    await Promise.all(
+      toRestore.map((e) =>
+        addEvent({ category: e.category, text: e.text, timestamp: e.timestamp }),
+      ),
+    );
     await refresh();
   }
 </script>
@@ -88,10 +91,20 @@
       <h2 class="day-label">{group.label}</h2>
       <ul>
         {#each group.events as e (e.id)}
-          <li class="event">
+          <li
+            class="event"
+            use:swipe={editingId === e.id
+              ? {}
+              : { onLeft: () => onDelete(e), onRight: () => onDuplicate(e) }}
+          >
             {#if editingId === e.id}
               <div class="edit">
-                <EventFields bind:category={editCategory} bind:text={editText} bind:when={editWhen} />
+                <EventFields
+                  bind:category={editCategory}
+                  bind:text={editText}
+                  bind:when={editWhen}
+                  onSubmit={() => saveEdit(e)}
+                />
                 <div class="actions">
                   <button class="primary" onclick={() => saveEdit(e)} disabled={!editCategory.trim()}>
                     Save
@@ -100,16 +113,32 @@
                 </div>
               </div>
             {:else}
-              <div class="meta">
+              <div class="row">
                 <span class="time">{timeLabel(e.timestamp)}</span>
                 <span class="dot" style="background:{categoryColor(e.category)}"></span>
                 <span class="category">{e.category}</span>
-              </div>
-              {#if e.text}<p class="text">{e.text}</p>{/if}
-              <div class="actions">
-                <button onclick={() => startEdit(e)}>Edit</button>
-                <button onclick={() => onDuplicate(e)}>Duplicate</button>
-                <button class="danger" onclick={() => onDelete(e)}>Delete</button>
+                {#if e.text}<span class="text">{e.text}</span>{/if}
+                <span class="actions">
+                  <button class="icon" aria-label="Edit" onclick={() => startEdit(e)}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                    </svg>
+                  </button>
+                  <button class="icon" aria-label="Duplicate" onclick={() => onDuplicate(e)}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="9" y="9" width="11" height="11" rx="2" />
+                      <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                    </svg>
+                  </button>
+                  <button class="icon danger" aria-label="Delete" onclick={() => onDelete(e)}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
+                    </svg>
+                  </button>
+                </span>
               </div>
             {/if}
           </li>
@@ -119,9 +148,9 @@
   {/each}
 {/if}
 
-{#if lastDeleted}
+{#if pendingDeleted.length > 0}
   <div class="snackbar" role="status">
-    <span>Deleted</span>
+    <span>{pendingDeleted.length === 1 ? 'Deleted' : `Deleted ${pendingDeleted.length}`}</span>
     <button onclick={undoDelete}>Undo</button>
   </div>
 {/if}
@@ -149,15 +178,14 @@
     margin: 0;
     padding: 0;
   }
-  /* Flat, separated rows — no card chrome. */
+  /* One compact line per event, no rules between them. */
   .event {
-    padding: 0.6rem 0;
-    border-top: 1px solid var(--border);
+    padding: 0.3rem 0;
   }
-  .meta {
+  .row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.55rem;
   }
   .time {
     font-family: var(--font-mono);
@@ -165,41 +193,71 @@
     color: var(--muted);
     font-size: 0.85rem;
     letter-spacing: -0.02em;
+    flex: none;
   }
   .dot {
-    width: 0.6rem;
-    height: 0.6rem;
+    width: 0.55rem;
+    height: 0.55rem;
     border-radius: 50%;
     flex: none;
   }
   .category {
     font-weight: 600;
+    white-space: nowrap;
+    flex: none;
   }
+  /* Note fills the middle and ellipsises so the row stays a single line. */
   .text {
-    margin: 0.2rem 0 0;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--muted);
   }
+  /* Bordered panel, matching the add form, so an in-progress edit reads as one group. */
   .edit {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
   }
   .actions {
     display: flex;
-    gap: 1.1rem;
     align-items: center;
-    margin-top: 0.5rem;
   }
-  /* Text buttons — minimal, no box. */
+  .row .actions {
+    margin-left: auto;
+    flex: none;
+    gap: 0.1rem;
+  }
+  .edit .actions {
+    margin-top: 0.2rem;
+    gap: 0.5rem;
+  }
+  /* Touch device: static states (no hover/focus reveals), generous tap padding. */
   .actions button {
     cursor: pointer;
     background: none;
     border: none;
-    padding: 0.2rem 0;
     color: var(--muted);
     font: inherit;
     font-size: 0.85rem;
+    padding: 0.45rem 0.55rem;
+  }
+  /* Icon action buttons (row) — square, compact, tappable. */
+  .actions .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem;
+  }
+  .actions .icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: block;
   }
   .actions .primary {
     color: var(--accent);
@@ -234,6 +292,7 @@
     color: var(--accent);
     font: inherit;
     font-weight: 600;
-    padding: 0;
+    padding: 0.3rem 0.6rem;
+    margin: -0.3rem -0.3rem -0.3rem 0;
   }
 </style>

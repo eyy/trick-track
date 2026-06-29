@@ -161,6 +161,32 @@ test('delete without undo leaves the event gone', async ({ page }) => {
   await expect(eventRows(page)).toHaveCount(0);
 });
 
+test('deleting several within the window batches into one Undo that restores all', async ({
+  page,
+}) => {
+  await addEvent(page, { category: 'Batch', note: 'one' });
+  await addEvent(page, { category: 'Batch', note: 'two' });
+  await expect(eventRows(page)).toHaveCount(2);
+
+  // Delete both rows (each Delete removes immediately and accumulates the batch).
+  await eventRows(page).first().getByRole('button', { name: 'Delete' }).click();
+  await expect(eventRows(page)).toHaveCount(1);
+  await eventRows(page).first().getByRole('button', { name: 'Delete' }).click();
+  await expect(eventRows(page)).toHaveCount(0);
+
+  // A single snackbar reads "Deleted 2" with exactly one Undo button.
+  const snackbar = page.locator('div.snackbar[role="status"]');
+  await expect(snackbar).toContainText('Deleted 2');
+  await expect(snackbar.getByRole('button', { name: 'Undo' })).toHaveCount(1);
+
+  // One Undo restores the whole batch (both notes back, order-agnostic since the
+  // two share a minute-precision timestamp).
+  await snackbar.getByRole('button', { name: 'Undo' }).click();
+  await expect(eventRows(page)).toHaveCount(2);
+  await expect(page.getByText('one')).toBeVisible();
+  await expect(page.getByText('two')).toBeVisible();
+});
+
 // 9. Free-text note suggestions: a note used >= 3 times in a category becomes a chip.
 test('a note used 3x in a category surfaces a tap-to-fill suggestion chip', async ({
   page,

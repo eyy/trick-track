@@ -1,10 +1,11 @@
 <script lang="ts">
   import { groupBy } from 'es-toolkit';
-  import { store, refresh } from '../lib/store.svelte';
+  import { store, refresh, prefillCategory } from '../lib/store.svelte';
   import { addEvent } from '../lib/db';
   import { categoryColor } from '../lib/color';
 
   const WINDOW_MS = 30 * 24 * 60 * 60 * 1000; // ~last 30 days
+  const LONG_PRESS_MS = 450;
 
   // Top categories by recent frequency, tiebroken by most-recent use.
   const top = $derived.by(() => {
@@ -21,8 +22,30 @@
       .map((s) => s.category);
   });
 
-  // One tap logs the category now, with an empty note.
-  async function quickLog(category: string) {
+  // Tap logs the category instantly (now, empty note); long-press prefills the form.
+  let pressTimer: ReturnType<typeof setTimeout> | null = null;
+  let longPressed = false;
+
+  function startPress(category: string) {
+    longPressed = false;
+    pressTimer = setTimeout(() => {
+      longPressed = true;
+      prefillCategory(category);
+    }, LONG_PRESS_MS);
+  }
+
+  function endPress() {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+  }
+
+  async function onClick(category: string) {
+    if (longPressed) {
+      longPressed = false; // the long-press already prefilled; don't also log
+      return;
+    }
     await addEvent({ category, text: '', timestamp: Date.now() });
     await refresh();
   }
@@ -31,7 +54,14 @@
 {#if top.length > 0}
   <div class="quicklog">
     {#each top as c (c)}
-      <button type="button" onclick={() => quickLog(c)}>
+      <button
+        type="button"
+        onpointerdown={() => startPress(c)}
+        onpointerup={endPress}
+        onpointerleave={endPress}
+        onpointercancel={endPress}
+        onclick={() => onClick(c)}
+      >
         <span class="dot" style="background:{categoryColor(c)}"></span>{c}
       </button>
     {/each}
@@ -55,7 +85,10 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 1rem;
-    padding: 0.35rem 0.8rem;
+    padding: 0.5rem 0.9rem;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
   }
   .dot {
     width: 0.6rem;

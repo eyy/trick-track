@@ -1,10 +1,14 @@
 <script lang="ts">
   import { store } from '../lib/store.svelte';
 
-  let { value = $bindable('') }: { value?: string } = $props();
+  let {
+    value = $bindable(''),
+    inputEl = $bindable<HTMLInputElement | undefined>(undefined),
+  }: { value?: string; inputEl?: HTMLInputElement } = $props();
 </script>
 
 <input
+  bind:this={inputEl}
   class="category-input"
   list="category-options"
   bind:value

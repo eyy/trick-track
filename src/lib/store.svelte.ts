@@ -18,3 +18,12 @@ export async function refresh(): Promise<void> {
   store.categories = categories;
   store.loaded = true;
 }
+
+// Cross-component signal: long-pressing a quick-log chip prefills the add form's
+// category. Bumping `nonce` lets the form react even to a repeat of the same category.
+export const compose = $state({ category: '', nonce: 0 });
+
+export function prefillCategory(category: string): void {
+  compose.category = category;
+  compose.nonce++;
+}

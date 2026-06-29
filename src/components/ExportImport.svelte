@@ -65,7 +65,7 @@
   button {
     cursor: pointer;
     border-radius: 0.5rem;
-    padding: 0.4rem 0.8rem;
+    padding: 0.5rem 0.85rem;
     background: var(--card);
     border: 1px solid var(--border);
     color: var(--text);
@@ -81,7 +81,7 @@
   }
   .import .btn {
     display: inline-block;
-    padding: 0.4rem 0.8rem;
+    padding: 0.5rem 0.85rem;
     border: 1px solid var(--border);
     border-radius: 0.5rem;
     background: var(--card);
