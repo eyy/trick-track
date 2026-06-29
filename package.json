@@ -1,0 +1,36 @@
+{
+  "name": "trick-track",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+    "lint": "eslint .",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/node": "^24.13.2",
+    "@vite-pwa/assets-generator": "^1.0.2",
+    "eslint": "^10.6.0",
+    "eslint-plugin-svelte": "^3.20.0",
+    "globals": "^17.7.0",
+    "svelte": "^5.56.3",
+    "svelte-check": "^4.6.0",
+    "svelte-eslint-parser": "^1.8.0",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.62.0",
+    "vite": "^8.1.0",
+    "vite-plugin-pwa": "^1.3.0"
+  },
+  "dependencies": {
+    "dexie": "^4.4.4",
+    "es-toolkit": "^1.49.0"
+  }
+}

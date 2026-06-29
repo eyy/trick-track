@@ -1,0 +1,41 @@
+/* Global layer: design tokens (dark-only) + body reset.
+   Everything else is scoped inside its own component's <style>. */
+:root {
+  /* Cool-ink surfaces; a single signal-amber accent (a departures-board cue). */
+  --bg: #111317;
+  --card: #181b21;
+  --text: #e7e8ea;
+  --muted: #888e98;
+  --border: #262a31;
+  --accent: #e9a83c;
+  --accent-ink: #17120a; /* text on the amber accent */
+  --danger: #e36a6a;
+
+  /* Body in the UI sans; times/labels/wordmark in mono, like a timetable. */
+  --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  color-scheme: dark;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100svh;
+}
+
+/* Keyboard-focus baseline (quality floor; lives in the global reset layer). */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
