@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/logo.svg" alt="trick-track" width="96" height="96" />
+</p>
+
 # trick-track
 
 A small personal PWA to track events — each has a timestamp, a category, and a note.

@@ -37,9 +37,11 @@ standalone, offline). Data is local-only in IndexedDB (via Dexie); there is no b
   accent (`--accent`), **monospace tabular** times + day labels + wordmark (`--font-mono`), and a
   curated muted categorical palette for dots (`src/lib/color.ts`). Derive colors/type from the
   `:root` tokens; spend boldness only on the amber accent.
-- **Locale**: format dates/times via `toLocale*` with the `undefined` locale (inferred from the
-  browser language) — never hardcode a locale or a day/month order. 24-hour clock is the lone
-  intentional override.
+- **Dates/times**: day headers use **ISO `YYYY-MM-DD`** (plus Today/Yesterday for the two most
+  recent) and **24-hour** time — deliberate, unambiguous, locale-independent. The native
+  `<input type="datetime-local">` display format is **OS/browser-locale controlled and not
+  page-settable** (the `lang` attribute is ignored by Chromium); its value is always ISO. On iOS
+  it renders as a native date/time wheel, so format ambiguity is a non-issue there.
 - **CSS scoped to its component** as much as possible. `app.css` holds only the design tokens
   (`:root`) and the body reset — no global element styling.
 - Local-first; cloud sync is a possible future, kept behind the `db.ts` data layer.

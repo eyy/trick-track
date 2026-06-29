@@ -19,13 +19,8 @@ export function dayLabel(ms: number): string {
   const diffDays = Math.round((startOf(now) - startOf(d)) / 86_400_000);
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';
-  // Inferred entirely from the browser locale (its language preference) — nothing hardcoded.
-  return d.toLocaleDateString(undefined, {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+  // ISO YYYY-MM-DD — unambiguous and locale-independent (local date, not UTC).
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 /** Local clock time in 24h, e.g. "14:05" — departure-board style, fixed width. */
