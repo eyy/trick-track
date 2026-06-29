@@ -19,10 +19,13 @@ export function dayLabel(ms: number): string {
   const diffDays = Math.round((startOf(now) - startOf(d)) / 86_400_000);
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';
-  // Force day-before-month order (never US month/day); names follow the locale.
-  const weekday = d.toLocaleDateString(undefined, { weekday: 'short' });
-  const month = d.toLocaleDateString(undefined, { month: 'short' });
-  return `${weekday} ${d.getDate()} ${month} ${d.getFullYear()}`;
+  // Inferred entirely from the browser locale (its language preference) — nothing hardcoded.
+  return d.toLocaleDateString(undefined, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 /** Local clock time in 24h, e.g. "14:05" — departure-board style, fixed width. */
