@@ -11,7 +11,7 @@
 
 <main>
   <header>
-    <img class="logo" src="/logo.svg" alt="" />
+    <img class="logo" src="{import.meta.env.BASE_URL}logo.svg" alt="" />
     <h1>trick-track</h1>
   </header>
 
