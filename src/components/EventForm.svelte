@@ -12,11 +12,6 @@
 
   const canSubmit = $derived(category.trim().length > 0);
 
-  // Focus the category field on load for fast entry.
-  $effect(() => {
-    categoryEl?.focus();
-  });
-
   // A long-pressed quick-log chip prefills the category here. Trigger on the nonce only and
   // read the category untracked, so unrelated reactivity can't yank focus mid-typing.
   $effect(() => {
