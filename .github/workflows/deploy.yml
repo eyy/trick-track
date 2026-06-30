@@ -24,8 +24,6 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run build
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true # self-enable Pages so a fresh setup can't hit the not-enabled failure
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
