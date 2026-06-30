@@ -4,7 +4,6 @@
   import { addEvent, deleteEvent, duplicateEvent, updateEvent } from '../lib/db';
   import { dayLabel, timeLabel, toLocalInputValue, fromLocalInputValue } from '../lib/datetime';
   import { categoryColor } from '../lib/color';
-  import { swipe } from '../lib/swipe';
   import type { TrackedEvent } from '../lib/types';
   import EventFields from './EventFields.svelte';
 
@@ -91,12 +90,7 @@
       <h2 class="day-label">{group.label}</h2>
       <ul>
         {#each group.events as e (e.id)}
-          <li
-            class="event"
-            use:swipe={editingId === e.id
-              ? {}
-              : { onLeft: () => onDelete(e), onRight: () => onDuplicate(e) }}
-          >
+          <li class="event">
             {#if editingId === e.id}
               <div class="edit">
                 <EventFields

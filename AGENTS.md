@@ -13,7 +13,6 @@ standalone, offline). Data is local-only in IndexedDB (via Dexie); there is no b
 - Per-row actions are **icon buttons** (pencil/copy/trash, `aria-label`led): **Edit** (inline,
   bordered panel), **Duplicate** (copies category + note, stamped now), **Delete** (immediate,
   with a **batched Undo** snackbar — deleting several within the rolling window restores them all).
-  Swipe a row **left to delete**, **right to duplicate**.
 - **Quick-log**: top categories by recent use (last ~30 days, max 4) as buttons — **tap** logs
   instantly (now, empty note); **long-press** prefills the add form.
 - Entry aids: a **"last logged Xh ago"** hint, a case-insensitive **"did you mean?"** category
@@ -88,7 +87,7 @@ IndexedDB (`event-tracker` is deleted + reloaded in a `beforeEach`). Keep the su
 ## Layout
 
 - `src/lib/` — `db.ts` (data layer), `store.svelte.ts` (reactive state + `compose` prefill signal),
-  `types.ts`, `datetime.ts`, `color.ts` (category palette), `swipe.ts` (swipe `use:` action).
+  `types.ts`, `datetime.ts`, `color.ts` (category palette).
 - `src/components/` — `QuickLog`, `EventForm`, `EventFields` (shared add/edit fields + hints +
   suggestions), `EventList`, `CategorySelect`, `ExportImport`.
 - `src/App.svelte` — composition root.
